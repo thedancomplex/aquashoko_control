@@ -1,0 +1,44 @@
+<?xml version="1.0"?>
+
+
+
+<launch>
+
+  <!-- these are the arguments you can pass this launch file, for example paused:=true -->
+  <arg name="paused" default="false"/>
+  <arg name="use_sim_time" default="true"/>
+  <arg name="gui" default="true"/>
+  <arg name="headless" default="false"/>
+  <arg name="debug" default="false"/>
+  <arg name="verbose" default="false"/>
+
+  <arg name="name" default="aquashoko"/>
+  <arg name="x" default="0.0"/>
+  <arg name="y" default="0.0"/>
+  <arg name="z" default="0.5"/>
+
+  <!-- We resume the logic in empty_world.launch, changing only the name of the world to be launched -->
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="debug" value="$(arg debug)" />
+    <arg name="gui" value="$(arg gui)" />
+    <arg name="paused" value="$(arg paused)"/>
+    <arg name="use_sim_time" value="$(arg use_sim_time)"/>
+    <arg name="headless" value="$(arg headless)"/>
+    <arg name="verbose" value="$(arg verbose)"/>
+  </include>
+
+  <!-- push robot_description to factory and spawn robot in gazebo -->
+  <node name="spawn_robot" pkg="gazebo_ros" type="spawn_model"
+   args="-file /home/thaus/ros_aqua_ws/src/AquaShoko-Gazebo/ComplexAquaShokoLongLeg/model.sdf
+         -sdf
+         -x $(arg x)
+         -y $(arg y)
+         -z $(arg z)
+         -model $(arg name)"
+   respawn="false" output="screen" >
+  </node>
+
+  <node name="ros2ach_bridge" pkg="aquashoko_ros" type="roboControl.py" output="screen" >
+  </node>
+
+</launch>
