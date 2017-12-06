@@ -5,15 +5,15 @@
 <launch>
 
   <!-- these are the arguments you can pass this launch file, for example paused:=true -->
-  <arg name="paused" default="false"/>
+  <arg name="paused" default="true"/>
   <arg name="use_sim_time" default="true"/>
   <arg name="gui" default="true"/>
   <arg name="headless" default="false"/>
   <arg name="debug" default="false"/>
-  <arg name="verbose" default="false"/>
+  <arg name="verbose" default="true"/>
 
   <arg name="name" default="aquashoko"/>
-  <arg name="model_path" default="/home/thaus/ros_aqua_ws/src/AquaShoko-Gazebo/ComplexAquaShokoLongLeg/model.sdf"/>
+  <arg name="model_path" default="$(find aquashoko_gazebo)/ComplexAquaShokoLongLeg/model.sdf"/>
   <arg name="x" default="0.0"/>
   <arg name="y" default="0.0"/>
   <arg name="z" default="0.5"/>
@@ -40,6 +40,6 @@
   </node>
 
   <node name="ros2ach_bridge" pkg="aquashoko_ros" type="roboControl.py" output="screen" >
-  </node>
+  </node >
 
 </launch>
