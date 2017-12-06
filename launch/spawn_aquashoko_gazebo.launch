@@ -13,6 +13,7 @@
   <arg name="verbose" default="false"/>
 
   <arg name="name" default="aquashoko"/>
+  <arg name="model_path" default="/home/thaus/ros_aqua_ws/src/AquaShoko-Gazebo/ComplexAquaShokoLongLeg/model.sdf"/>
   <arg name="x" default="0.0"/>
   <arg name="y" default="0.0"/>
   <arg name="z" default="0.5"/>
@@ -29,7 +30,7 @@
 
   <!-- push robot_description to factory and spawn robot in gazebo -->
   <node name="spawn_robot" pkg="gazebo_ros" type="spawn_model"
-   args="-file /home/thaus/ros_aqua_ws/src/AquaShoko-Gazebo/ComplexAquaShokoLongLeg/model.sdf
+   args="-file $(arg model_path)
          -sdf
          -x $(arg x)
          -y $(arg y)
