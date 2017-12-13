@@ -40,6 +40,8 @@ class PID:
         # init error from the previous algorithm step
         self.error_old = 0
 
+        self.dead_zone = 0
+
         # flag indicates first step of the algorithm
         self.firstPass = True
 
@@ -74,6 +76,10 @@ class PID:
     def set_kd(self, invar):
         """ Set derivative gain. """
         self.kd = invar
+
+    def set_dead_zone(self, invar):
+        """ Set dead zone. """
+        self.dead_zone = invar
 
     def get_kd(self):
         """Returns derivative gain"""
@@ -129,6 +135,21 @@ class PID:
             self.ref = ref
             self.meas = meas
             error = ref - meas
+
+            
+            if error > 0.0001 and error < self.dead_zone:
+                error = 0
+                self.error_old = 0
+            else:
+                error = error - self.dead_zone
+
+            if error < -0.0001 and error > -self.dead_zone:
+                error = 0
+                self.error_old = 0
+            else:
+                error = error + self.dead_zone
+            
+
 
             de = error - self.error_old                         # diff error
             self.up = self.kp * error                           # proportional term
