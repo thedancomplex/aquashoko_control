@@ -94,10 +94,10 @@ class AttitudeControl:
         self.pid_yaw_rate.set_ki(0)
         self.pid_yaw_rate.set_kd(0)
 
-        self.joint0 = [0, -45, -45,
-                       0, -45, -45,
-                       0, -45, -45,
-                       0, -45, -45]
+        self.joint0 = [0, -45, -60,
+                       0, -45, -60,
+                       0, -45, -60,
+                       0, -45, -60]
 
         self.joint_ref = self.joint0
         self.joint_msg = JointState();
@@ -181,13 +181,13 @@ class AttitudeControl:
                 self.count += 1
                 print self.count, ' - ',  dt_clk
 
-            self.u_meas[0,0] = math.radians((self.joint_pos[0] - self.joint_pos[6]) / 2.0)
-            self.u_meas[1,0] = math.radians((self.joint_pos[3] - self.joint_pos[9]) / 2.0)
-            self.u_meas[2,0] = math.radians((self.joint_pos[1] - self.joint_pos[7]) / 2.0)
-            self.u_meas[3,0] = math.radians((self.joint_pos[4] - self.joint_pos[10]) / 2.0)
-            self.compute_jacobian()
-            self.inv_Jacobian = numpy.linalg.pinv(self.Jacobian)
-
+            self.u_meas[0,0] = 0 #math.radians((self.joint_pos[0] - self.joint_pos[6]) / 2.0)
+            self.u_meas[1,0] = 0 #math.radians((self.joint_pos[3] - self.joint_pos[9]) / 2.0)
+            self.u_meas[2,0] = 0 #math.radians((self.joint_pos[1] - self.joint_pos[7]) / 2.0)
+            self.u_meas[3,0] = 0 #math.radians((self.joint_pos[4] - self.joint_pos[10]) / 2.0)
+            #self.compute_jacobian()
+            #self.inv_Jacobian = numpy.linalg.pinv(self.Jacobian)
+            self.inv_Jacobian = numpy.matrix([[0.5*12.0,0.5*25.0],[0.5*-25.0,0.5*12.0], [-25.0,0.0],[0.0,-25.0]])
 
             delta_y_ref = self.pid_roll.compute(self.euler_sp.x, self.euler_mv.x, dt_clk)
             # roll rate pid compute
