@@ -64,9 +64,10 @@ class AttitudeControl:
         ##################################################################
         # Add your PID params here
 
-        self.pid_roll.set_kp(0.25/100) # 0.001
+        self.pid_roll.set_kp(0.0003) # 0.001
         self.pid_roll.set_ki(0.0)
-        self.pid_roll.set_kd(0.3/100)
+        self.pid_roll.set_kd(0)
+        self.pid_roll.set_dead_zone(0.0)
 
         self.pid_roll_rate.set_kp(0.0)
         self.pid_roll_rate.set_ki(0.0)
@@ -74,9 +75,10 @@ class AttitudeControl:
         self.pid_roll_rate.set_lim_high(1.0)
         self.pid_roll_rate.set_lim_low(-1.0)
 
-        self.pid_pitch.set_kp(0.25/100)
+        self.pid_pitch.set_kp(0.0003)
         self.pid_pitch.set_ki(0)
-        self.pid_pitch.set_kd(0.3/100)
+        self.pid_pitch.set_kd(0.0)
+        self.pid_pitch.set_dead_zone(0.0)
 
         self.pid_pitch_rate.set_kp(0.0)
         self.pid_pitch_rate.set_ki(0.0)
@@ -179,10 +181,10 @@ class AttitudeControl:
                 self.count += 1
                 print self.count, ' - ',  dt_clk
 
-            self.u_meas[0,0] = 0#math.radians((self.joint_pos[0] - self.joint_pos[6]) / 2.0)
-            self.u_meas[1,0] = 0#math.radians((self.joint_pos[3] - self.joint_pos[9]) / 2.0)
-            self.u_meas[2,0] = 0#math.radians((self.joint_pos[1] - self.joint_pos[7]) / 2.0)
-            self.u_meas[3,0] = 0#math.radians((self.joint_pos[4] - self.joint_pos[10]) / 2.0)
+            self.u_meas[0,0] = math.radians((self.joint_pos[0] - self.joint_pos[6]) / 2.0)
+            self.u_meas[1,0] = math.radians((self.joint_pos[3] - self.joint_pos[9]) / 2.0)
+            self.u_meas[2,0] = math.radians((self.joint_pos[1] - self.joint_pos[7]) / 2.0)
+            self.u_meas[3,0] = math.radians((self.joint_pos[4] - self.joint_pos[10]) / 2.0)
             self.compute_jacobian()
             self.inv_Jacobian = numpy.linalg.pinv(self.Jacobian)
 
