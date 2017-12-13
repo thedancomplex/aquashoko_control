@@ -7,7 +7,7 @@
   <!-- these are the arguments you can pass this launch file, for example paused:=true -->
   <arg name="paused" default="true"/>
   <arg name="use_sim_time" default="true"/>
-  <arg name="gui" default="true"/>
+  <arg name="gui" default="false"/>
   <arg name="headless" default="false"/>
   <arg name="debug" default="false"/>
   <arg name="verbose" default="true"/>
@@ -16,7 +16,7 @@
   <arg name="model_path" default="$(find aquashoko_gazebo)/ComplexAquaShokoLongLeg/model.sdf"/>
   <arg name="x" default="0.0"/>
   <arg name="y" default="0.0"/>
-  <arg name="z" default="3.0"/>
+  <arg name="z" default="20.0"/>
 
   <!-- We resume the logic in empty_world.launch, changing only the name of the world to be launched -->
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
@@ -27,6 +27,8 @@
     <arg name="headless" value="$(arg headless)"/>
     <arg name="verbose" value="$(arg verbose)"/>
   </include>
+
+  <param name="robot_description" textfile="$(arg model_path)"/>
 
   <!-- push robot_description to factory and spawn robot in gazebo -->
   <node name="spawn_robot" pkg="gazebo_ros" type="spawn_model"
