@@ -1,0 +1,32 @@
+aquashoko:
+  # Publish all joint states -----------------------------------
+  joint_state_controller:
+    type: joint_state_controller/JointStateController
+    publish_rate: 50
+
+  yaw11_control:
+    type: effort_controllers/JointPositionController
+    joint: yaw11
+    pid: {p: 0.5, i: 0.1, d: 0.1, i_clamp_max: 10.0, i_clamp_min: -10.0}
+  yaw31_control:
+    type: effort_controllers/JointPositionController
+    joint: yaw31
+    pid: {p: 0.5, i: 0.1, d: 0.1, i_clamp_max: 10.0, i_clamp_min: -10.0}
+
+  pitch12_control:
+    type: effort_controllers/JointPositionController
+    joint: pitch12
+    pid: {p: 0.8, i: 0.8, d: 0.21, i_clamp_max: 10.0, i_clamp_min: -10.0}
+  pitch32_control:
+    type: effort_controllers/JointPositionController
+    joint: pitch32
+    pid: {p: 0.8, i: 0.8, d: 0.21, i_clamp_max: 10.0, i_clamp_min: -10.0}
+
+  pitch13_control:
+    type: effort_controllers/JointPositionController
+    joint: pitch13
+    pid: {p: 1.0, i: 0.2, d: 0.35, i_clamp_max: 10.0, i_clamp_min: -10.0}
+  pitch33_control:
+    type: effort_controllers/JointPositionController
+    joint: pitch33
+    pid: {p: 1.0, i: 0.2, d: 0.35, i_clamp_max: 10.0, i_clamp_min: -10.0}

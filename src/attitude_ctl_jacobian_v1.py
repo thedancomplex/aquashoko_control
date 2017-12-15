@@ -64,7 +64,7 @@ class AttitudeControl:
         ##################################################################
         # Add your PID params here
 
-        self.pid_roll.set_kp(0.0003) # 0.001
+        self.pid_roll.set_kp(0.0004) # 0.001
         self.pid_roll.set_ki(0.0)
         self.pid_roll.set_kd(0)
         self.pid_roll.set_dead_zone(0.0)
@@ -75,7 +75,7 @@ class AttitudeControl:
         self.pid_roll_rate.set_lim_high(1.0)
         self.pid_roll_rate.set_lim_low(-1.0)
 
-        self.pid_pitch.set_kp(0.0003)
+        self.pid_pitch.set_kp(0.0004)
         self.pid_pitch.set_ki(0)
         self.pid_pitch.set_kd(0.0)
         self.pid_pitch.set_dead_zone(0.0)
@@ -187,7 +187,7 @@ class AttitudeControl:
             self.u_meas[3,0] = 0 #math.radians((self.joint_pos[4] - self.joint_pos[10]) / 2.0)
             #self.compute_jacobian()
             #self.inv_Jacobian = numpy.linalg.pinv(self.Jacobian)
-            self.inv_Jacobian = numpy.matrix([[0.5*12.0,0.5*25.0],[0.5*-25.0,0.5*12.0], [-25.0,0.0],[0.0,-25.0]])
+            self.inv_Jacobian = numpy.matrix([[1.0*12.0,0.25*25.0],[0.25*-25.0, 1.0*12.0], [-25.0,0.0],[0.0,-25.0]])
 
             delta_y_ref = self.pid_roll.compute(self.euler_sp.x, self.euler_mv.x, dt_clk)
             # roll rate pid compute
