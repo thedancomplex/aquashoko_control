@@ -64,9 +64,9 @@ class AttitudeControl:
         ##################################################################
         # Add your PID params here
 
-        self.pid_roll.set_kp(0.0004) # 0.001
+        self.pid_roll.set_kp(0.004) # 0.001
         self.pid_roll.set_ki(0.0)
-        self.pid_roll.set_kd(0)
+        self.pid_roll.set_kd(0.001)
         self.pid_roll.set_dead_zone(0.0)
 
         self.pid_roll_rate.set_kp(0.0)
@@ -75,9 +75,9 @@ class AttitudeControl:
         self.pid_roll_rate.set_lim_high(1.0)
         self.pid_roll_rate.set_lim_low(-1.0)
 
-        self.pid_pitch.set_kp(0.0004)
+        self.pid_pitch.set_kp(0.004)
         self.pid_pitch.set_ki(0)
-        self.pid_pitch.set_kd(0.0)
+        self.pid_pitch.set_kd(0.001)
         self.pid_pitch.set_dead_zone(0.0)
 
         self.pid_pitch_rate.set_kp(0.0)
@@ -181,13 +181,13 @@ class AttitudeControl:
                 self.count += 1
                 print self.count, ' - ',  dt_clk
 
-            self.u_meas[0,0] = 0 #math.radians((self.joint_pos[0] - self.joint_pos[6]) / 2.0)
-            self.u_meas[1,0] = 0 #math.radians((self.joint_pos[3] - self.joint_pos[9]) / 2.0)
-            self.u_meas[2,0] = 0 #math.radians((self.joint_pos[1] - self.joint_pos[7]) / 2.0)
-            self.u_meas[3,0] = 0 #math.radians((self.joint_pos[4] - self.joint_pos[10]) / 2.0)
-            #self.compute_jacobian()
-            #self.inv_Jacobian = numpy.linalg.pinv(self.Jacobian)
-            self.inv_Jacobian = numpy.matrix([[1.0*12.0,0.25*25.0],[0.25*-25.0, 1.0*12.0], [-25.0,0.0],[0.0,-25.0]])
+            self.u_meas[0,0] = math.radians((self.joint_pos[0] - self.joint_pos[6]) / 2.0)
+            self.u_meas[1,0] = math.radians((self.joint_pos[3] - self.joint_pos[9]) / 2.0)
+            self.u_meas[2,0] = math.radians((self.joint_pos[1] - self.joint_pos[7]) / 2.0)
+            self.u_meas[3,0] = math.radians((self.joint_pos[4] - self.joint_pos[10]) / 2.0)
+            self.compute_jacobian()
+            self.inv_Jacobian = numpy.linalg.pinv(self.Jacobian)
+            #self.inv_Jacobian = numpy.matrix([[1.0*12.0,1.0*25.0],[1.0*-25.0, 1.0*12.0], [-25.0,0.0],[0.0,-25.0]])
 
             delta_y_ref = self.pid_roll.compute(self.euler_sp.x, self.euler_mv.x, dt_clk)
             # roll rate pid compute
@@ -210,6 +210,7 @@ class AttitudeControl:
               # Publish joint references
 
             #if self.loop_count < 5:
+            
             self.joint_ref[1] = math.degrees(self.du_ref[2,0]) + self.joint0[1]
             self.joint_ref[7] = math.degrees(-self.du_ref[2,0]) + self.joint0[7]
             self.joint_ref[4] = math.degrees(self.du_ref[3,0]) + self.joint0[4]
@@ -219,7 +220,7 @@ class AttitudeControl:
             self.joint_ref[6] = math.degrees(-self.du_ref[0,0]) + self.joint0[6]
             self.joint_ref[3] = math.degrees(self.du_ref[1,0]) + self.joint0[3]
             self.joint_ref[9] = math.degrees(-self.du_ref[1,0]) + self.joint0[9]
-
+            
             self.joint_msg.header.stamp = rospy.Time.now()
             self.joint_msg.position = copy.deepcopy(self.joint_ref)
             self.pub_joint_references.publish(self.joint_msg)
