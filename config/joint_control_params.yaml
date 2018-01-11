@@ -30,3 +30,4 @@ aquashoko:
     type: effort_controllers/JointPositionController
     joint: pitch33
     pid: {p: 1.0, i: 0.2, d: 0.35, i_clamp_max: 10.0, i_clamp_min: -10.0}
+
