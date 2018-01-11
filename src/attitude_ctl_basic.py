@@ -7,32 +7,14 @@ from pid import PID
 from geometry_msgs.msg import Vector3, Vector3Stamped, PoseWithCovarianceStamped
 from sensor_msgs.msg import Imu, JointState
 from std_msgs.msg import Float32, Float64
-from morus_msgs.msg import PIDController
+from aquashoko_control.msg import PIDController
 from dynamic_reconfigure.server import Server
-from morus_msgs.cfg import MavAttitudeCtlParamsConfig
+from aquashoko_control.cfg import AttitudeControlParamsConfig
 import math, copy
 from datetime import datetime
 from rosgraph_msgs.msg import Clock
 
 class AttitudeControl:
-    '''
-    Class implements MAV attitude control (roll, pitch, yaw). Two PIDs in cascade are
-    used for each degree of freedom.
-    Subscribes to:
-        /morus/imu                - used to extract attitude and attitude rate of the vehicle
-        /morus/mot_vel_ref        - used to receive referent motor velocity from the height controller
-        /morus/euler_ref          - used to set the attitude referent (useful for testing controllers)
-    Publishes:
-        /morus/command/motors     - referent motor velocities sent to each motor controller
-        /morus/pid_roll           - publishes PID-roll data - referent value, measured value, P, I, D and total component (useful for tuning params)
-        /morus/pid_roll_rate      - publishes PID-roll_rate data - referent value, measured value, P, I, D and total component (useful for tuning params)
-        /morus/pid_pitch          - publishes PID-pitch data - referent value, measured value, P, I, D and total component (useful for tuning params)
-        /morus/pid_pitch_rate     - publishes PID-pitch_rate data - referent value, measured value, P, I, D and total component (useful for tuning params)
-        /morus/pid_yaw            - publishes PID-yaw data - referent value, measured value, P, I, D and total component (useful for tuning params)
-        /morus/pid_yaw_rate       - publishes PID-yaw_rate data - referent value, measured value, P, I, D and total component (useful for tuning params)
-
-    Dynamic reconfigure is used to set controllers param online.
-    '''
 
     def __init__(self):
         '''
@@ -51,13 +33,7 @@ class AttitudeControl:
         self.clock = Clock()
 
         self.pid_roll = PID()                           # roll controller
-        self.pid_roll_rate  = PID()                     # roll rate (wx) controller
-
         self.pid_pitch = PID()                          # pitch controller
-        self.pid_pitch_rate = PID()                     # pitch rate (wy) controller
-
-        self.pid_yaw = PID()                            # yaw controller
-        self.pid_yaw_rate = PID()                       # yaw rate (wz) controller
 
         ##################################################################
         ##################################################################
@@ -67,29 +43,10 @@ class AttitudeControl:
         self.pid_roll.set_ki(0.0)
         self.pid_roll.set_kd(0.3)
 
-        self.pid_roll_rate.set_kp(0.0)
-        self.pid_roll_rate.set_ki(0.0)
-        self.pid_roll_rate.set_kd(0)
-        self.pid_roll_rate.set_lim_high(1.0)
-        self.pid_roll_rate.set_lim_low(-1.0)
 
         self.pid_pitch.set_kp(0.25)
         self.pid_pitch.set_ki(0)
         self.pid_pitch.set_kd(0.3)
-
-        self.pid_pitch_rate.set_kp(0.0)
-        self.pid_pitch_rate.set_ki(0.0)
-        self.pid_pitch_rate.set_kd(0)
-        self.pid_pitch_rate.set_lim_high(1.0)
-        self.pid_pitch_rate.set_lim_low(-1.0)
-
-        self.pid_yaw.set_kp(0)
-        self.pid_yaw.set_ki(0)
-        self.pid_yaw.set_kd(0)
-
-        self.pid_yaw_rate.set_kp(0)
-        self.pid_yaw_rate.set_ki(0)
-        self.pid_yaw_rate.set_kd(0)
 
         self.joint0 = [0, -45, -45,
                        0, -45, -45,
@@ -114,12 +71,8 @@ class AttitudeControl:
 
         self.pub_joint_references = rospy.Publisher('aquashoko_chatter', JointState, queue_size=1)
         self.pub_pid_roll = rospy.Publisher('pid_roll', PIDController, queue_size=1)
-        self.pub_pid_roll_rate = rospy.Publisher('pid_roll_rate', PIDController, queue_size=1)
         self.pub_pid_pitch = rospy.Publisher('pid_pitch', PIDController, queue_size=1)
-        self.pub_pid_pitch_rate = rospy.Publisher('pid_pitch_rate', PIDController, queue_size=1)
-        #self.pub_pid_yaw = rospy.Publisher('pid_yaw', PIDController, queue_size=1)
-        #self.pub_pid_yaw_rate = rospy.Publisher('pid_yaw_rate', PIDController, queue_size=1)
-        self.cfg_server = Server(MavAttitudeCtlParamsConfig, self.cfg_callback)
+        self.cfg_server = Server(AttitudeControlParamsConfig, self.cfg_callback)
 
     def run(self):
         '''
@@ -147,23 +100,14 @@ class AttitudeControl:
 
             clock_now = self.clock
             dt_clk = (clock_now.clock - clock_old.clock).to_sec()
-
             clock_old = clock_now
-            if dt_clk > (1.0 / self.rate + 0.01):
-                self.count += 1
-                print self.count, ' - ',  dt_clk
 
-            if dt_clk < (1.0 / self.rate - 0.01):
-                self.count += 1
-                print self.count, ' - ',  dt_clk
+            if dt_clk < 0.0001:
+                #this should never happen, but if it does, set default value of sample time
+                dt_clk = 1.0 / self.rate
 
             roll_cmd = self.pid_roll.compute(self.euler_sp.x, self.euler_mv.x, dt_clk)
-            # roll rate pid compute
-            #roll_cmd = self.pid_roll_rate.compute(roll_rate_sv, self.euler_rate_mv.x, dt_clk)
-
             pitch_cmd = self.pid_pitch.compute(self.euler_sp.y, self.euler_mv.y, dt_clk)
-            # pitch rate pid compute
-            #pitch_cmd = self.pid_pitch_rate.compute(pitch_rate_sv, self.euler_rate_mv.y, dt_clk)
 
             # Publish joint references
             self.joint_ref[1] = math.degrees(pitch_cmd) + self.joint0[1]
@@ -177,11 +121,7 @@ class AttitudeControl:
          
             # Publish PID data - could be usefule for tuning
             self.pub_pid_roll.publish(self.pid_roll.create_msg())
-            self.pub_pid_roll_rate.publish(self.pid_roll_rate.create_msg())
-            self.pub_pid_pitch.publish(self.pid_pitch.create_msg())
-            #self.pub_pid_pitch_rate.publish(self.pid_pitch_rate.create_msg())
-            #self.pub_pid_yaw.publish(self.pid_yaw.create_msg())
-            #self.pub_pid_yaw_rate.publish(self.pid_yaw_rate.create_msg())
+            self.pub_pid_pitch.publish(self.pid_pitch.create_msg()) 
 
     def ahrs_cb(self, msg):
         '''
@@ -237,25 +177,9 @@ class AttitudeControl:
             config.roll_ki = self.pid_roll.get_ki()
             config.roll_kd = self.pid_roll.get_kd()
 
-            config.roll_r_kp = self.pid_roll_rate.get_kp()
-            config.roll_r_ki = self.pid_roll_rate.get_ki()
-            config.roll_r_kd = self.pid_roll_rate.get_kd()
-
             config.pitch_kp = self.pid_pitch.get_kp()
             config.pitch_ki = self.pid_pitch.get_ki()
             config.pitch_kd = self.pid_pitch.get_kd()
-
-            config.pitch_r_kp = self.pid_pitch_rate.get_kp()
-            config.pitch_r_ki = self.pid_pitch_rate.get_ki()
-            config.pitch_r_kd = self.pid_pitch_rate.get_kd()
-
-            config.yaw_kp = self.pid_yaw.get_kp()
-            config.yaw_ki = self.pid_yaw.get_ki()
-            config.yaw_kd = self.pid_yaw.get_kd()
-
-            config.yaw_r_kp = self.pid_yaw_rate.get_kp()
-            config.yaw_r_ki = self.pid_yaw_rate.get_ki()
-            config.yaw_r_kd = self.pid_yaw_rate.get_kd()
 
             self.config_start = True
         else:
@@ -264,26 +188,9 @@ class AttitudeControl:
             self.pid_roll.set_ki(config.roll_ki)
             self.pid_roll.set_kd(config.roll_kd)
 
-            self.pid_roll_rate.set_kp(config.roll_r_kp)
-            self.pid_roll_rate.set_ki(config.roll_r_ki)
-            self.pid_roll_rate.set_kd(config.roll_r_kd)
-
             self.pid_pitch.set_kp(config.pitch_kp)
             self.pid_pitch.set_ki(config.pitch_ki)
             self.pid_pitch.set_kd(config.pitch_kd)
-
-            self.pid_pitch_rate.set_kp(config.pitch_r_kp)
-            self.pid_pitch_rate.set_ki(config.pitch_r_ki)
-            self.pid_pitch_rate.set_kd(config.pitch_r_kd)
-
-            self.pid_yaw.set_kp(config.yaw_kp)
-            self.pid_yaw.set_kp(config.yaw_kp)
-            self.pid_yaw.set_ki(config.yaw_ki)
-            self.pid_yaw.set_kd(config.yaw_kd)
-
-            self.pid_yaw_rate.set_kp(config.yaw_r_kp)
-            self.pid_yaw_rate.set_ki(config.yaw_r_ki)
-            self.pid_yaw_rate.set_kd(config.yaw_r_kd)
 
         # this callback should return config data back to server
         return config
