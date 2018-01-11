@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(aquashoko_ros)
+project(aquashoko_control)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 # add_compile_options(-std=c++11)
@@ -84,9 +84,8 @@ find_package(catkin REQUIRED message_generation dynamic_reconfigure)
 ##     and list every .cfg file to be processed
 
 ## Generate dynamic reconfigure parameters in the 'cfg' folder
-generate_dynamic_reconfigure_options(
-  cfg/AquashokoJointControlParams.cfg
-)
+#generate_dynamic_reconfigure_options(
+#)
 
 ###################################
 ## catkin specific configuration ##
@@ -99,7 +98,7 @@ generate_dynamic_reconfigure_options(
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
 #  INCLUDE_DIRS include
-#  LIBRARIES aquashoko_ros
+#  LIBRARIES aquashoko_control
 #  CATKIN_DEPENDS other_catkin_pkg
 #  DEPENDS system_lib
 )
@@ -117,7 +116,7 @@ include_directories(
 
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
-#   src/${PROJECT_NAME}/aquashoko_ros.cpp
+#   src/${PROJECT_NAME}/aquashoko_control.cpp
 # )
 
 ## Add cmake target dependencies of the library
@@ -128,7 +127,7 @@ include_directories(
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-# add_executable(${PROJECT_NAME}_node src/aquashoko_ros_node.cpp)
+# add_executable(${PROJECT_NAME}_node src/aquashoko_control_node.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -185,7 +184,7 @@ include_directories(
 #############
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_aquashoko_ros.cpp)
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_aquashoko_control.cpp)
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()
