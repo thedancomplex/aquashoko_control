@@ -141,9 +141,9 @@ class AttitudeControl:
         qw = msg.orientation.w
 
         # conversion quaternion to euler (yaw - pitch - roll)
-        self.euler_mv.x = math.atan2(2 * (qw * qx + qy * qz), qw * qw - qx * qx - qy * qy + qz * qz)
-        self.euler_mv.y = math.asin(2 * (qw * qy - qx * qz))
-        self.euler_mv.z = math.atan2(2 * (qw * qz + qx * qy), qw * qw + qx * qx - qy * qy - qz * qz)
+        self.euler_mv.x = qx #math.atan2(2 * (qw * qx + qy * qz), qw * qw - qx * qx - qy * qy + qz * qz)
+        self.euler_mv.y = qy #math.asin(2 * (qw * qy - qx * qz))
+        self.euler_mv.z = qz #math.atan2(2 * (qw * qz + qx * qy), qw * qw + qx * qx - qy * qy - qz * qz)
 
         # gyro measurements (p,q,r)
         p = msg.angular_velocity.x

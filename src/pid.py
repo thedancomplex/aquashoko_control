@@ -1,5 +1,5 @@
 from datetime import datetime
-from morus_msgs.msg import PIDController
+from aquashoko_control.msg import PIDController
 import rospy
 
 class PID:
