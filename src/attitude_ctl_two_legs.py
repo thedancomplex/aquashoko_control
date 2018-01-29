@@ -39,21 +39,37 @@ class AttitudeControl:
         ##################################################################
         # Add your PID params here
 
-        self.pid_roll.set_kp(0.1)
+        #self.pid_roll.set_kp(0.1)
+        self.pid_roll.set_kp(2.0)
+#        self.pid_roll.set_ki(2.0)
         self.pid_roll.set_ki(0.0)
-        self.pid_roll.set_kd(0.025)
+#        self.pid_roll.set_kd(0.0)
+        self.pid_roll.set_kd(0.0)
+        #self.pid_roll.set_kd(0.025)
 
 
-        self.pid_pitch.set_kp(0.1)
-        self.pid_pitch.set_ki(0)
-        self.pid_pitch.set_kd(0.025)
+        #self.pid_pitch.set_kp(2.0)
+        self.pid_pitch.set_kp(2.0)
+        self.pid_pitch.set_ki(2.0)
+#        self.pid_pitch.set_ki(0.0)
+#        self.pid_pitch.set_kd(0.0)
+        self.pid_pitch.set_kd(0.0)
+        #self.pid_pitch.set_kd(0.025)
+
+# Anti Windup
+        self.pid_roll.set_lim_high(math.radians(40.0))
+        self.pid_roll.set_lim_low(math.radians(-40.0))
+        self.pid_pitch.set_lim_high(math.radians(40.0))
+        self.pid_pitch.set_lim_low(math.radians(-40.0))
+
+
 
         self.joint0 = [0, -45, -60,
                        0, -45, -60,
                        0, -45, -60,
                        0, -45, -60]
 
-        self.joint_ref = self.joint0
+        self.joint_ref = copy.deepcopy(self.joint0)
         self.joint_msg = JointState();
 
 
@@ -114,9 +130,18 @@ class AttitudeControl:
             self.joint_ref[1] = math.degrees(pitch_cmd) + self.joint0[1]
             self.joint_ref[7] = -math.degrees(pitch_cmd) + self.joint0[7]
             
-            # pitch command goes to yaw1 joint of the leg 1 and 3
+#dan disable for no roll control
+            # roll command goes to yaw1 joint of the leg 1 and 3
             self.joint_ref[0] = math.degrees(roll_cmd) + self.joint0[0]
             self.joint_ref[6] = -math.degrees(roll_cmd) + self.joint0[6]
+
+#            print "self.joint_ref[1] = ", self.joint_ref[1]
+#            print "self.joint_ref[7] = ", self.joint_ref[7]
+#            print "self.joint_ref[0] = ", self.joint_ref[0]
+#            print "self.joint_ref[6] = ", self.joint_ref[6]
+
+
+
 
             self.joint_msg.header.stamp = rospy.Time.now()
             self.joint_msg.position = copy.deepcopy(self.joint_ref)
